@@ -1,0 +1,6 @@
+source 'http://rubygems.org'
+ruby '2.1.2'
+gem 'sinatra'
+gem "rmagick", '~> 2.13.3', :require => 'RMagick'
+gem 'json'
+gem 'rest_client'
