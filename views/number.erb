@@ -1,22 +1,24 @@
 <html>
-    <head>
-        <title><%= @title %></title>
-    </head>
-    <body>
-        <h1><%= @title %></h1>
-        <p><%= @subtitle %></p>
+  <head>
+    <title><%= @title %></title>
+  </head>
+  <body>
+    <h1><%= @title %></h1>
+    <p><%= @subtitle %></p>
+    
+    <% @imagelist.each do |image| %>
+    <table>
+      <form method="post" action="pic">
+	<input type="hidden" name="body4" value="<%= image[:url] %>">
+	<tr>
+	  <td><%= image[:id] %></td>
+	  <td><input type="submit" value="画像表示"></td>
+	</tr>
+      </form>
+    </table>
+    <% end %>
 
-<p><%= @b[0] %></p>
-<p><%= @b[1] %></p>
-
-<p><%= @wordword %></p>
-
-  <form method="post" action="pic">
-    <p>URL:<input type="text" name="body4"></p>
-<input type="submit" value="post">
-  </form>
-
-
-    </body>
+    <p><%= @wordword %></p>
+  </body>
 </html>
 

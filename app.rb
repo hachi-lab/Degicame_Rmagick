@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
 require 'rubygems'
-require 'RMagick'
 require 'sinatra'
-include Magick
+
+unless ENV['local']=='yes'
+  require 'RMagick'
+  include Magick
+end
 
 #require 'rubygems'
 require 'json'
@@ -32,76 +35,78 @@ post '/select' do
 $username = @params[:body1]
 $password = @params[:body2]
 
-# デジカメ計速を利用するには，
-# 最初にログインして，キー（16進40桁）を受け取る
-# 以下の情報取得には，このキーを利用する
-puts '=== /user/login'
-$key = RestClient.post("#{$api_server}/user/login",
-                      username: $username, 
-                      password: $password)
+  # デジカメ計速を利用するには，
+  # 最初にログインして，キー（16進40桁）を受け取る
+  # 以下の情報取得には，このキーを利用する
+  puts '=== /user/login'
+  $key = RestClient.post("#{$api_server}/user/login",
+                         username: $username, 
+                         password: $password)
+  
+  # プロジェクト一覧を取得する
+  # JSON 形式なので，パースする
+  puts '=== /project/list'
+  ret = RestClient.post("#{$api_server}/project/list",
+                        key: $key)
+  @projects = JSON.parse(ret)
 
-# プロジェクト一覧を取得する
-# JSON 形式なので，パースする
-puts '=== /project/list'
-ret = RestClient.post("#{$api_server}/project/list",
-                      key: $key)
-projects = JSON.parse(ret)
+  # 表示
+  # @a = Array.new
+  # num = 0
+  # projects.each do |project|
+  #  #puts format('%3d: %s', project["id"], project["title"])
+  #  #project = ハッシュの配列
+  #  @a[num] = project["id"].to_s + ":" + project["title"].to_s
+  #  num += 1
+  #  #    p @a[num]
+  # end
+  
+  @title = 'Rmagick'
+  @subtitle = '編集・表示する画像のidを入力してください'
 
-# 表示
-@a = Array.new
-num = 0
-projects.each do |project|
-  #puts format('%3d: %s', project["id"], project["title"])
-#project = ハッシュの配列
-@a[num] = project["id"].to_s + ":" + project["title"].to_s
-num += 1
-p @a[num]
-
-end
-
-
-@title = 'Rmagick'
-@subtitle = '編集・表示する画像のidを入力してください'
-
-erb :main
+  erb :main
 end
 
 
 post '/id' do
-
-
-#画像のURLを取得するくだり
-# プロジェクト番号を入力させる
-puts 'Project id:'
-project_id = @params[:body3]
-
-# 指定したプロジェクトが持つ画像一覧を取得する
-puts '=== /project/images'
-ret = RestClient.post("#{$api_server}/project/images",
-                      key: $key,
-                      project_id: project_id)
-images = JSON.parse(ret)
-
-# 画像のURLを取得して表示する
-# 取得したURLは一定時間が経過すると無効化されるので注意すること
-@b = Array.new
-num = 0
-images.each do |image|
-  url = RestClient.post("#{$api_server}/image/image_url",
+  #画像のURLを取得するくだり
+  # プロジェクト番号を入力させる
+  project_id = @params[:body3]
+  
+  # 指定したプロジェクトが持つ画像一覧を取得する
+  puts '=== /project/images'
+  ret = RestClient.post("#{$api_server}/project/images",
                         key: $key,
-                        image_id: image["id"])
-@b[num] = "[" + image["id"].to_s + "]" + ":" + url.to_s
-num += 1
+                        project_id: project_id)
+  images = JSON.parse(ret)
 
-puts "#{image["id"]} : #{url}"
+  @imagelist = []
+  images.each do |image|
+    url = RestClient.post("#{$api_server}/image/image_url",
+                          key: $key,
+                          image_id: image["id"])
+    @imagelist << {id: image["id"], url: url}
+  end
+    
+  # 画像のURLを取得して表示する
+  # 取得したURLは一定時間が経過すると無効化されるので注意すること
+  # @b = Array.new
+  # num = 0
+  # images.each do |image|
+  #  url = RestClient.post("#{$api_server}/image/image_url",
+  #                        key: $key,
+  #                        image_id: image["id"])
+  #  @b[num] = "[" + image["id"].to_s + "]" + ":" + url.to_s
+  #  num += 1
+  #  
+  #  puts "#{image["id"]} : #{url}"
+  #end
 
-end
-
-@title = @params[:body3]
-@subtitle = "画像のURLです"
-@wordword = "URLをフォームに入力することで編集した画像を表示します"
-
-erb :number
+  @title = @params[:body3]
+  @subtitle = "画像のURLです"
+  @wordword = "URLをフォームに入力することで編集した画像を表示します"
+  
+  erb :number
 end
 
 #画像表示
