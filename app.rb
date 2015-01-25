@@ -62,7 +62,7 @@ $password = @params[:body2]
   # end
   
   @title = 'Rmagick'
-  @subtitle = '編集・表示する画像のidを入力してください'
+  @subtitle = '編集・表示するプロジェクトを選択してください'
 
   erb :main
 end
@@ -103,8 +103,8 @@ post '/id' do
   #end
 
   @title = @params[:body3]
-  @subtitle = "画像のURLです"
-  @wordword = "URLをフォームに入力することで編集した画像を表示します"
+  @subtitle = "画像"
+  @wordword = "表示する画像をクリックしてください"
   
   erb :number
 end
